@@ -25,35 +25,36 @@ class PokerGame < ApplicationRecord
     # 处理获取到的发牌记录,结果eg: {"C_10"=>9, "D_8"=>7, "D_10"=>9, "S_8"=>7, "D_3"=>2} 
     # 'C_10'中'C'记录的是花色, spade(S) > heart(H) > club(C) > diamond(D), 数字根据PokerGame::SORT记录顺序大小
     arrs = record.gsub('10', '0').split('')
-		j = ''
+    j = ''
     record_hash = {}
-		arrs.each do |arr|
-			if ['S', 'H', 'C', 'D'].include?(arr)
-				j = arr
-				next
-			end
-			h_key = j + '_' + PokerGame::SORT[arr].to_s
-			if ['J', 'Q', 'K', '0'].include?(arr)
-				record_hash[h_key] = 10
-      else   
-				record_hash[h_key] = arr == 'A' ? 1 : arr.to_i
-			end
-		end
+    arrs.each do |arr|
+      if ['S', 'H', 'C', 'D'].include?(arr)
+        j = arr
+        next
+      end
+
+      h_key = j + '_' + PokerGame::SORT[arr].to_s
+      if ['J', 'Q', 'K', '0'].include?(arr)
+        record_hash[h_key] = 10
+      else
+        record_hash[h_key] = arr == 'A' ? 1 : arr.to_i
+      end
+    end
     return record_hash
-	end
+  end
 	
   def get_score(record_list)
     # 获取分数的思路是如果三张牌之和能被10整除, 
     # 那么余下的两张牌之和除以10的余数等于五张牌之和除以10的余数,任意两张牌之和在(0 < sum =< 20)
-		remainder = (record_list.values.sum)%10
+    remainder = (record_list.values.sum)%10
     return 10 if remainder == 0
-		record_list.each do |key, value|
-			tag = remainder - value < 0 ? (remainder + 10 - value) : (remainder - value)
-			if record_list.except(key.to_sym).has_value?(tag)
-				return remainder
-			end
-		end
-		return 0
+    record_list.each do |key, value|
+      tag = remainder - value < 0 ? (remainder + 10 - value) : (remainder - value)
+      if record_list.except(key.to_sym).has_value?(tag)
+        return remainder
+      end
+    end
+    return 0
   end
 
   def self.compare 
